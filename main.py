@@ -1,5 +1,48 @@
 import time
 import math
+from copy import deepcopy
+
+def LU(matrix, b, x):
+    pass
+
+def residuum_norm(matrix, b, x):
+    #TODO RESIDUUM NORM
+    pass
+
+def gauss_iteration(matrix, b, x):
+    for i in range(len(matrix)):
+        row_sum = 0
+        for j in range(len(matrix)):
+            if j != i:
+                row_sum += matrix[i][j] * x[j]
+        x[i] = (b[i] - row_sum) / matrix[i][i]
+    return x
+    
+
+def jacobi_iteration(matrix, b, x):
+    x_old = deepcopy(x)
+    for i in range(len(matrix)):
+        row_sum = 0
+        for j in range(len(matrix)):
+            if j != i:
+                row_sum += matrix[i][j] * x_old[j]
+        x[i] = (b[i] - row_sum) / matrix[i][i]
+    
+    return x
+
+def iterative(type, matrix, b, x):
+    iterations = 0
+    norms = []
+    residuum = residuum_norm(matrix, b, x)
+    while residuum >= 10 ** -9:
+        if type == "jacobi":
+            x = jacobi_iteration(matrix, b, x)
+        else: # gauss-seidel
+            x = gauss_iteration(matrix, b, x)
+        residuum = residuum_norm(matrix, b, x)
+        norms.append(residuum)
+        iterations += 1
+    return x, iterations, norms
 
 def matrix_fill(matrix, a1):
     for i in range(len(matrix)):
@@ -31,7 +74,7 @@ def create_vector(n):
 
 def b_vector_fill(b, f):
     for i in range(len(b)):
-        b[i] = math.sin((i + 1) * (f+1)) # i + 1, poniewaz zakladam, ze indeksujemy od 1
+        b[i] = math.sin((i + 1) * (f+1))
     return b
 
 if __name__ == "__main__":
@@ -48,22 +91,26 @@ if __name__ == "__main__":
     x = create_vector(int("9" + str(album)[4] + str(album)[5]) - 901) # debug x
     # x = create_vector(int("9" + str(album)[4] + str(album)[5]))
     # print(x) # debug
-    
-    
-    # gauss
-    start_timer = time.time()
-    # TODO gauss
-    end_timer = time.time()
-    print("Gauss: ", end_timer - start_timer)
+    residuum = 10 ** -9
     
     # jacobi
     start_timer = time.time()
-    # TODO jacobi
+    jacobi_x, iterations, norms = iterative("jacobi", matrix, b, deepcopy(x))
+    # print(jacobi_x, iterations)
     end_timer = time.time()
     print("Jacobi: ", end_timer - start_timer)
     
+    # gauss
+    start_timer = time.time()
+    gauss_x, iterations, norms = iterative("jacobi", matrix, b, deepcopy(x))
+    # print(gauss_x, iterations)
+    end_timer = time.time()
+    print("Gauss: ", end_timer - start_timer)
+
     # lu factorization
     start_timer = time.time()
-    # TODO lu factorization
+    x, iterations, norms = LU(matrix, b, deepcopy(x))
     end_timer = time.time()
     print("LU factorization: ", end_timer - start_timer)
+    
+    #TODO WYKRESY
